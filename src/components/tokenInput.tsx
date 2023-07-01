@@ -1,11 +1,13 @@
 import React from 'react';
-
+import { api } from "~/utils/api";
 interface InputFieldProps {
+  username:string
   value: string;
   onChange: (value: string) => void;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ value, onChange }) => {
+const InputField: React.FC<InputFieldProps> = ({ value, onChange,username }) => {
+  const {mutate} = api.example.setUserToken.useMutation();
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value);
   };
@@ -13,6 +15,7 @@ const InputField: React.FC<InputFieldProps> = ({ value, onChange }) => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log('Input value:', value);
+    mutate({token:value,username:username})
   };
 
   return (

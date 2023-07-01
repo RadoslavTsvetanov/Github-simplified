@@ -22,17 +22,31 @@ export default function Home() {
 
 function AuthShowcase() {
   const [numOfRepos,setNumOfRepos] = React.useState(0)
+  const [user,setUser] = React.useState({});
   const { data: sessionData } = useSession();
   const [github_repos,setRepos ]= React.useState([])
   const [token,setToken] = React.useState('');
   function handleTokenChange(value:string){
     setToken(value)
   }
+  const getUser = api.example.getUserData.useQuery(
+    {
+     username: sessionData?.user.name || ""
+    },
+ {
+   enabled: sessionData?.user !== undefined,
+   onSuccess: (data) => {
+    console.log(data)
+     setUser(data);
+     setToken(data?.github_token || "")
+   },
+ })
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
     { enabled: sessionData?.user !== undefined }
   );
   React.useEffect(() => {
+    
     getUserInfo(sessionData?.user.name || "",token).then((data) => {
       setRepos(data.data.map((repo) => {
         console.log(repo);
@@ -46,7 +60,7 @@ function AuthShowcase() {
   },[token,sessionData?.user.name])
   return (
     
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex items-center justify-center gap-4 flex-col">
       <p className="text-center text-2xl text-white">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
@@ -58,11 +72,11 @@ function AuthShowcase() {
         {sessionData ? "Sign out" : "Sign in"}
       </button>
       {sessionData && <>
-        <InputField value={token} onChange={handleTokenChange}/>
+        <InputField value={token} onChange={handleTokenChange} username={sessionData.user.name}/>
       <MAIN/>
       <CreateRepoButton/>
       <h1>Repos:{numOfRepos}</h1>
-      {github_repos}
+      <div className="flex items-center justify-center gap-4 flex-wrap "> {github_repos}</div> 
       </>
       }
     </div>
