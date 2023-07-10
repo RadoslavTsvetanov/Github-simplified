@@ -1,18 +1,21 @@
 import {createRepository} from "~/octokit_actions/basic_functions"
 
 import React, { useState } from 'react';
-
-const CreateRepoButton: React.FC = () => {
+interface Props{
+  token:string;
+}
+const CreateRepoButton: React.FC<Props> = ({token}) => {
   const [name, setName] = useState('');
+  const [description,setDescription] = useState('')
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async(event: React.FormEvent) => {
+    await createRepository(name,"",token);
     event.preventDefault();
     setIsVisible(!isVisible);
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsVisible(!isVisible);
     setName(event.target.value);
   };
 
@@ -29,6 +32,10 @@ const CreateRepoButton: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <label>
           Name:
+          <input type="text" value={name} onChange={handleChange} />
+        </label>
+        <label>
+          Description
           <input type="text" value={name} onChange={handleChange} />
         </label>
         <button type="submit">Done</button>

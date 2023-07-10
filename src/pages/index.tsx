@@ -60,7 +60,7 @@ function AuthShowcase() {
   },[token,sessionData?.user.name])
   return (
     
-    <div className="flex items-center justify-center gap-4 flex-col">
+    <div className="flex items-center justify-center gap-4 flex-col" data-theme="night">
       <p className="text-center text-2xl text-white">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
@@ -72,9 +72,9 @@ function AuthShowcase() {
         {sessionData ? "Sign out" : "Sign in"}
       </button>
       {sessionData && <>
-        <InputField value={token} onChange={handleTokenChange} username={sessionData.user.name}/>
+        <InputField value={token} onChange={handleTokenChange} username={sessionData?.user.name || ""}/>
       <MAIN/>
-      <CreateRepoButton/>
+      <CreateRepoButton token = {token}/>
       <h1>Repos:{numOfRepos}</h1>
       <div className="flex items-center justify-center gap-4 flex-wrap "> {github_repos}</div> 
       </>
