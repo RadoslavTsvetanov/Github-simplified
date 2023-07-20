@@ -5,34 +5,33 @@ interface RepoProps {
   description: string;
   link: string;
   owner:string;
-  token:string
 }
 
-export const Repo: React.FC<RepoProps> = ({ name, description, link,owner,token }) => {
+export const Repo: React.FC<RepoProps> = ({ name, description, link,owner }) => {
   const handleUpdate = async () => {
 //    await  writeFileToRepository(owner,name,)
   };
 
   const handleDelete = async() => {
-    await deleteRepository(owner,name,token);
+    await deleteRepository(owner,name);
   };
 
   return (
-    <div className=" p-4 rounded-lg shadow-md max-w-xs ">
+    <div className="bg-gray-100 p-4 rounded-lg shadow-md">
       <h3 className="text-xl font-bold mb-2">{name}</h3>
-      <p className=" mb-4">{description}</p>
+      <p className="text-gray-600 mb-4">{description}</p>
       <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline mb-4 block">
         {link}
       </a>
       <div>
         <button
-          className="btn-secondary btn"
+          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg mr-2"
           onClick={handleUpdate}
         >
           Update
         </button>
         <button
-          className=" btn-primary btn "
+          className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg"
           onClick={handleDelete}
         >
           Delete

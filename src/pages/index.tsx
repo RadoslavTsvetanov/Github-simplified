@@ -3,13 +3,13 @@ import Head from "next/head";
 import Link from "next/link";
 import { api } from "~/utils/api";
 import { Octokit } from "octokit";
-import {createRepository,writeFileToRepository,getUserInfo,deleteRepository} from "~/octokit_actions/basic_functions"
+import {createRepository,writeFileToRepository,getUserInfo,deleteRepository,getStarredRepos} from "~/octokit_actions/basic_functions"
 import { useRouter } from 'next/router';
 import MAIN from "~/components/main"
 import React from "react";
 import InputField from"~/components/tokenInput"
 import Repo from "~/components/repo"
-import CreateRepoButton from "~/components/createRepoButton";
+import HighlightedDiv from "~/components/showSwitcher";
 export default function Home() {
   return (
     <div className="bg-purple-950">
@@ -21,46 +21,47 @@ export default function Home() {
 }
 
 function AuthShowcase() {
-  const [numOfRepos,setNumOfRepos] = React.useState(0)
-  const [user,setUser] = React.useState({});
   const { data: sessionData } = useSession();
+  const [filters,setFilters] = React.useState([])
+  const [showRepos,setShowRepos] = React.useState("starred")
   const [github_repos,setRepos ]= React.useState([])
   const [token,setToken] = React.useState('');
   function handleTokenChange(value:string){
     setToken(value)
   }
-  const getUser = api.example.getUserData.useQuery(
-    {
-     username: sessionData?.user.name || ""
-    },
- {
-   enabled: sessionData?.user !== undefined,
-   onSuccess: (data) => {
-    console.log(data)
-     setUser(data);
-     setToken(data?.github_token || "")
-   },
- })
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
     { enabled: sessionData?.user !== undefined }
   );
   React.useEffect(() => {
-    
-    getUserInfo(sessionData?.user.name || "",token).then((data) => {
+    if(showRepos === "normal"){
+      getUserInfo(sessionData?.user.name || "",token)
+    .then((data) => {
       setRepos(data.data.map((repo) => {
         console.log(repo);
-                setNumOfRepos(numOfRepos + 1);
-        return <Repo name={repo.name} description={repo.description || ""} link={""} owner = {repo.owner.login} token = {token} key = {repo.id}/>;
+                
+        return <Repo name={repo.name} description={repo.description || ""} link={repo.html_url} owner = {repo.owner.login} key={repo.id}/>;
       }));
     }).catch(error => {
       console.log(error)
     })
     
-  },[token,sessionData?.user.name])
+  }else{
+    getStarredRepos(sessionData?.user.name || "",token)
+    .then((data) => {
+      console.log(data)
+      setRepos(data.data.map((repo) =>{
+        return <Repo name={repo.name} description={repo.description || ""} link={repo.html_url} owner = {repo.owner.login} key={repo.id}/>;
+      }))
+    })
+    .catch(error => {
+      console.log(error)
+    })
+  }
+},[token])
   return (
     
-    <div className="flex items-center justify-center gap-4 flex-col" data-theme="night">
+    <div className="flex flex-col items-center justify-center gap-4">
       <p className="text-center text-2xl text-white">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
@@ -71,14 +72,11 @@ function AuthShowcase() {
       >
         {sessionData ? "Sign out" : "Sign in"}
       </button>
-      {sessionData && <>
-        <InputField value={token} onChange={handleTokenChange} username={sessionData?.user.name || ""}/>
+      <InputField value={token} onChange={handleTokenChange}/>
       <MAIN/>
-      <CreateRepoButton token = {token}/>
-      <h1>Repos:{numOfRepos}</h1>
-      <div className="flex items-center justify-center gap-4 flex-wrap "> {github_repos}</div> 
-      </>
-      }
+      <HighlightedDiv text={showRepos}/>{/*make it interactive */}
+      {/* make a grouping feature - folders with repos */}
+      {github_repos}
     </div>
   );
 }

@@ -67,8 +67,6 @@ export async function deleteRepository(owner:string, repo:string,token:string) {
     const octoKit = new Octokit({userAgent:'myApp v1.2.3',baseUrl: 'https://api.github.com',auth:token});
     try {
       // Make a request to delete the repository
-      console.log(token, "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");
-      
       console.log(owner)
       console.log(repo);
       
@@ -94,3 +92,16 @@ export async function deleteRepository(owner:string, repo:string,token:string) {
 //   .catch((error) => {
 //     console.error("Error:", error);
 //   });
+
+export async function getStarredRepos(username: string,token:string) {
+  try {
+    // Fetch the starred repositories for the specified user
+    const octokit = new Octokit({userAgent:'myApp v1.2.3',baseUrl: 'https://api.github.com',auth:token});
+    const response = await octokit.rest.activity.listReposStarredByAuthenticatedUser();
+
+    // Iterate over the response to access the starred repositories
+   return response;
+  } catch (error) {
+    console.error('Error retrieving starred repositories:', error);
+  }
+}

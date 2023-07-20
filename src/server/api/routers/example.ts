@@ -6,6 +6,57 @@ import {
 } from "~/server/api/trpc";
 
 export const exampleRouter = createTRPCRouter({
+  addRepoToCollection:protectedProcedure
+  .input(z.object({
+    link:z.string().nonempty(),
+    collectionId:z.string().nonempty()
+  }))
+  .mutation(({input,ctx}) => {
+    const Repo = ctx.prisma.repo.create({
+      data: {
+        link,
+        collection: { connect: { id: collectionId } },
+      },
+    });
+
+    return repo;
+  }),
+  createCollection : protectedProcedure
+  .input(z.object({ userId: z.string(),name:z.string()}))
+  .mutation(async ({input,ctx}) => {
+    const collection = await ctx.prisma.collection.create({
+      data:{
+        name:input.name,
+        userId:input.userId,
+      }
+    })
+    return collection;
+  }),
+
+
+
+  getUserCollections: protectedProcedure
+  .input(z.object({ userId: z.string()}))
+  .query(async ({ctx,input}) => {
+    const collections = await ctx.prisma.collection.findMany({
+      where: {
+        userId: input.userId,
+      },
+    });
+  
+    return collections;
+  }),
+  removeUserCollections: protectedProcedure
+  .input(z.object({ collectionId: z.string()}))
+  .mutation(async ({ctx,input}) => {
+    const collection = await prisma.collection.delete({
+      where: {
+        id: input.collectionId,
+      },
+    });
+    return collection
+  })
+  ,
   hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {
@@ -21,27 +72,4 @@ export const exampleRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
-  getUserData:protectedProcedure
-    .input(z.object({username:z.string()})).
-    query(async ({input,ctx}) => {
-        const user = await  ctx.prisma.user.findFirst({
-            where:{
-                name: input?.username?? "",
-            }
-        })
-        return user;
-    }),
-    setUserToken: protectedProcedure
-    .input(z.object({ token:z.string().nonempty(),username:z.string().nonempty()}))
-    .mutation( async ({ctx,input}) => {
-      const token = await ctx.prisma.user.updateMany({
-        where:{
-          name:input.username
-        },
-        data:{
-          github_token:   input.token,
-        }
-      })
-      return token
-    })
 });
